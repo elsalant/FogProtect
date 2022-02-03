@@ -1,0 +1,12 @@
+{
+    "input": {
+        "request": {
+            "operation": "READ",
+            "role": "boss",
+            "asset": {
+                "namespace": "default",
+                "name": "control.nonexistent"
+            }
+        }    
+    }
+}

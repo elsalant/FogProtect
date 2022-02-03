@@ -1,0 +1,18 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.open511.status
+spec:
+  secretRef:
+    name: admin
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - info
+    componentsMetadata:
+      sensors: 
+        tags:
+        - PII

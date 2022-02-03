@@ -1,0 +1,22 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.data.read-whdata
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - data
+    componentsMetadata:
+      id: 
+        tags:
+        - PII
+      Age:
+        tags:
+        - sensitive
+      Lname:
+        tags:
+        - sensitive

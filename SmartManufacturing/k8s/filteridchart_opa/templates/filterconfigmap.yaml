@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: filteropa
+data:
+  OPA_SERVER: opa.m4d-system
+  QUERYGW_URI: md4-system.filterid:5009
+  PYTHONUNBUFFERED: "1"
+  PYTHONIOENCODING: UTF-8

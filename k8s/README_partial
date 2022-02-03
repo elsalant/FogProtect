@@ -1,0 +1,7 @@
+If using curl, load policies:
+curl -X PUT "http://localhost:8181/v1/policies/petclinic" --data-binary @pet_policy.rego
+curl -X POST "http://localhost:8181/v1/compile?pretty=true" --data-binary '{"query" :"data.petclinic.authz.allow == true" ,"input": {"method": "GET","path": ["pets", "fluffy"],"subject": {"user": "alice","location": "SOMA"}}, "unknowns": ["data.pets"]}'
+else:
+  opa run --server
+  opa eval 'data.simple.allow == true' --data simple.rego -p -u "input.value" --format=pretty
+  opa eval 'data.petclinic.authz.allow == true' --data pet_policy.rego --input pet_input.yaml --format=pretty -u "data.pets" -p 

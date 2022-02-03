@@ -1,0 +1,27 @@
+apiVersion: app.m4d.ibm.com/v1alpha1
+kind: M4DModule
+metadata:
+  name: rest-module
+  labels:
+    name: rest-module
+    version: 0.0.1  # semantic version
+spec:
+  chart:
+    name: ghcr.io/the-mesh-for-data/rest-module-chart:v1
+  flows:
+    - read
+  capabilities:
+#    credentials-managed-by: secret-provider
+    api:
+      protocol: REST
+      dataformat: arrow
+    supportedInterfaces:
+    - flow: read
+      source:
+        protocol: REST
+        dataformat: json
+    actions:
+      - id: redact-ID
+        level: 2  # column
+      - id: removed-ID
+        level: 2  # column

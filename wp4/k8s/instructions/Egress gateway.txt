@@ -1,0 +1,22 @@
+Running demo to block external traffic
+
+-----
+1. Start a netcat listener outside of the istio mesh:
+from the vagrant box:
+ifconfig -> get IP that starts with 10.0...
+nc -l 1234
+2. Enter the querygw pod :
+kubectl get pods  -> get querygw container id
+kubectl exec --stdin --tty <container_id>  -- /bin/bash
+3. Connect to the external nc server
+nc <address from 1) 
+
+Create an istio egress gateway
+
+1. If the default policy is ALLOW_ANY, calls to external services pass through.  Check by:
+kubectl get configmap istio -n istio-system -o yaml | grep -o "mode: ALLOW_ANY" | uniq
+
+2. Change policy to REGISTRY_ONLY:
+kubectl get configmap istio -n istio-system -o yaml | sed 's/mode: ALLOW_ANY/mode: REGISTRY_ONLY/g' | kubectl replace -n istio-system -f -
+
+Confirm: kubectl get configmap istio -n istio-system -o yaml | grep -o "mode: REGISTRY_ONLY" | uniq

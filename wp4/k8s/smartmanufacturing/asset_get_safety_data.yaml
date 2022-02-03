@@ -1,0 +1,34 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.personnel-data.get-safety-data
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - personnel
+    componentsMetadata:
+      full_container.with_helmet: 
+        tags:
+        - PII
+      full_container.without_helmet:
+        tags:
+        - PII
+      not_secure.with_helmet:
+        tags:
+        - PII
+      not_secure.with_helmet:
+        tags:
+        - PII     
+      not_secure.without_helmet:
+        tags:
+        - PII      
+      secure.with_helmet:
+        tags:
+        - PII     
+      secure.without_helmet:
+        tags:
+        - PII     

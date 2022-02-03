@@ -1,0 +1,22 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.data.read-production-status
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - shared
+    componentsMetadata:
+      id: 
+        tags:
+        - PII
+      Age:
+        tags:
+        - sensitive
+      Lname:
+        tags:
+        - sensitive

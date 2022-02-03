@@ -1,0 +1,12 @@
+{
+    "input": {
+        "request": {
+            "operation": "READ",
+            "role": "worker",
+            "asset": {
+                "namespace": "default",
+                "name": "hr.get-addresses"
+            }
+        }    
+    }
+}

@@ -1,0 +1,51 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata: 
+  name: qgw
+spec: 
+  gateways: 
+    - dgw-gateway
+  hosts: 
+    - "*"
+  http: 
+    - 
+      match: 
+        - 
+          headers: 
+            group: 
+              exact: superman
+          uri: 
+            prefix: /query
+      route: 
+        - 
+          destination: 
+            host: filter-none
+            port: 
+              number: 5557
+    - 
+      match:
+        -
+          headers:
+            group:
+              exact: badguy
+          uri:
+            prefix: /query
+      rewrite: 
+        uri: "/blocked"
+      route:
+        -
+          destination:
+            host: querygw
+            port:
+              number: 9005
+    -
+      match: 
+        - 
+          uri: 
+            prefix: /query
+      route: 
+        - 
+          destination: 
+            host: filterid
+            port: 
+              number: 5556

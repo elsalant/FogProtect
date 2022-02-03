@@ -1,0 +1,22 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.order.send-order
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - order
+    componentsMetadata:
+      sensors: 
+        tags:
+        - PII
+      Age:
+        tags:
+        - PII
+      Lname:
+        tags:
+        - sensitive

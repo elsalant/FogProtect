@@ -1,0 +1,12 @@
+{
+    "input": {
+        "request": {
+            "operation": "READ",
+            "purpose": "CBA",
+            "asset": {
+                "namespace": "default",
+                "name": "data-csv"
+            }
+        }    
+    }
+}

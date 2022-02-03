@@ -1,0 +1,16 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: api.data.read-speed
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - data
+    componentsMetadata:
+      sensors: 
+        tags:
+        - general

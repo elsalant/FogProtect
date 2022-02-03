@@ -1,0 +1,16 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: videos
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - video
+    componentsMetadata:
+      results.organization: 
+        tags:
+        - FilterPred

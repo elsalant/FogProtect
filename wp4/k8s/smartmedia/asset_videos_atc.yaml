@@ -1,0 +1,22 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: videos.atc
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - video
+    componentsMetadata:
+      sensors: 
+        tags:
+        - PII
+      Age:
+        tags:
+        - PII
+      Lname:
+        tags:
+        - sensitive

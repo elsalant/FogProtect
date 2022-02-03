@@ -1,0 +1,74 @@
+#!/usr/bin/env bash
+
+ProgName=$(basename $0)
+
+verify_dependencies() {
+    if ! command -v awk &> /dev/null
+    then
+        echo "Command awk could not be found but $ProgName requires it."
+        echo "Please install awk first."
+        exit 1
+    fi
+    if ! command -v kubectl &> /dev/null
+    then
+        echo "Command kubectl could not be found but $ProgName requires it."
+        echo "Please install kubectl first."
+        exit 1
+    fi
+}
+
+cmd_help(){
+    echo "Usage: $ProgName <subcommand> [options]"
+    echo "Subcommands:"
+    echo "    policy <rego>  -   Outputs a configmap YAML from a rego file"
+    echo "    secret <creds> -   Outputs a Secret resource from a Credentials YAML file"
+    echo ""
+    echo "You can pipe the result to kubectl:"
+    echo "> $ProgName policy example.rego | kubectl apply -f -"
+    echo "> $ProgName secret example.yaml | kubectl apply -f -"
+    echo ""
+}
+  
+cmd_policy(){
+    if [ "$#" -ne 1 ]; then
+        echo "Error: expected a single argument <rego>"
+        exit 1
+    fi
+    regofilepath=$1
+    regofilename=${regofilepath##*/}
+    kubectl create configmap ${regofilename%.rego} --from-file=main=$regofilepath -n katalog-system -o yaml --dry-run=client | kubectl label -f- --dry-run=client -o yaml --local openpolicyagent.org/policy=rego
+}
+
+cmd_secret(){
+    if [ "$#" -ne 1 ]; then
+        echo "Error: expected a single argument <creds>"
+        exit 1
+    fi
+
+    credentialsPath=$1
+    kubectl apply --dry-run=client -f $credentialsPath > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        echo "Error: '$credentialsPath' is not a valid Credentials resource." >&2
+        exit 1
+    fi
+
+    secretName=$(awk '/^  name:/{print $2}' $credentialsPath)
+    kubectl create secret generic ${secretName} --from-file=main=$credentialsPath -o yaml --dry-run=client
+}
+
+subcommand=$1
+case $subcommand in
+    "" | "-h" | "--help")
+        cmd_help
+        ;;
+    *)
+        verify_dependencies
+        shift
+        cmd_${subcommand} $@
+        if [ $? = 127 ]; then
+            echo "Error: '$subcommand' is not a known subcommand." >&2
+            echo "       Run '$ProgName --help' for a list of known subcommand." >&2
+            exit 1
+        fi
+        ;;
+esac

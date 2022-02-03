@@ -1,0 +1,25 @@
+apiVersion: katalog.m4d.ibm.com/v1alpha1
+kind: Asset
+metadata:
+  name: status.get-logs
+spec:
+  assetDetails:
+    dataFormat: csv
+    connection:
+      type: s3
+  assetMetadata:
+    tags:
+    - general
+    componentsMetadata:
+      id: 
+        tags:
+        - PII
+      age:
+        tags:
+        - sensitive
+      Lname:
+        tags:
+        - sensitive
+      Fname:
+        tags:
+        - sensitive

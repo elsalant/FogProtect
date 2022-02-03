@@ -1,0 +1,210 @@
+# Asset CRD.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: assets.katalog.m4d.ibm.com
+spec:
+  group: katalog.m4d.ibm.com
+  scope: Namespaced
+  names:
+    plural: assets
+    singular: asset
+    kind: Asset
+    categories: 
+    - m4d
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                secretRef:
+                  description: Reference to a Secret resource holding credentials for this asset
+                  type: object
+                  properties:
+                    name:
+                      description: Name of the Secret resource (must exist in the same namespace)
+                      type: string
+                tags:
+                  description: Tags associated with the asset
+                  items:
+                    type: string
+                  type: array
+                schema:
+                  description: Schema information for rectangular data assets (can be partial)
+                  items:
+                    type: object
+                    properties:
+                      name:
+                        description: Column name
+                        type: string
+                      type:
+                        description: Column type
+                        type: string 
+                      tags:
+                        description: Tags associated with the column
+                        items:
+                          type: string
+                        type: array
+                    required:
+                    - name
+                  type: array
+                connection:
+                  description: Connection information
+                  type: object
+                  properties:
+                    custom:
+                      description: Arbitrary JSON for custom connections
+                      x-kubernetes-preserve-unknown-fields: true
+                      type: object
+                    s3:
+                      description: Connection information for S3 compatible object store
+                      type: object
+                      properties:
+                        endpoint:
+                          type: string
+                        region:
+                          type: string
+                        bucket:
+                          type: string
+                        path:
+                          type: string
+                        format:
+                          type: string
+                      required:
+                      - endpoint
+                      - bucket
+                      - path
+                      - format
+              required:
+              - connection
+---
+# Credentials CRD.
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  name: creds.katalog.m4d.ibm.com
+spec:
+  group: katalog.m4d.ibm.com
+  scope: Namespaced
+  names:
+    plural: creds
+    singular: cred
+    kind: Credentials
+    categories: 
+    - m4d
+  versions:
+    - name: v1alpha1
+      served: true
+      storage: true
+      schema:
+        openAPIV3Schema:
+          description: Credentials for an asset (can include arbitrary fields)
+          x-kubernetes-preserve-unknown-fields: true
+          type: object
+          properties:
+            spec:
+              type: object
+              properties:
+                custom:
+                  description: Arbitrary JSON for custom connections
+                  x-kubernetes-preserve-unknown-fields: true
+                  type: object       
+                awsKeys:
+                  description: Access and secret keys used in AWS and compatible systems
+                  type: object
+                  properties:
+                    accessKey:
+                      description: The access key is also known as AccessKeyId
+                      type: string
+                    secretKey:
+                      description: The secret key is also known as SecretAccessKey
+                      type: string
+                  required:
+                  - accessKey
+                  - secretKey
+                apiKey:
+                  description: API key used in various IAM enabled services
+                  type: string
+                basic:
+                  description: Password based authentication used in basic access authentication
+                  type: object
+                  properties:
+                    username:
+                      type: string
+                    password:
+                      type: string
+                  required:
+                  - password
+---
+# Namespace for katalog-system.
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: katalog-system
+---
+# ClusterRole katalog-editor allows users to manage assets.
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: katalog-editor
+rules:
+- apiGroups: ["katalog.m4d.ibm.com"]
+  resources: ["assets"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete", "deletecollection"]
+---
+# ClusterRole katalog-viewer allows viewing assets.
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: katalog-viewer
+rules:
+- apiGroups: ["katalog.m4d.ibm.com"]
+  resources: ["assets"]
+  verbs: ["get", "list", "watch"]
+---
+# Role katalog-policy-editor allows reading configmaps and updating them with policy status.
+kind: Role
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  namespace: katalog-system
+  name: katalog-policy-editor
+rules:
+- apiGroups: [""]
+  resources: ["configmaps"]
+  verbs: ["get", "list", "watch", "update", "patch"]
+---
+# Grant katalog-system services the katalog-viewer ClusterRole.
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: katalog-viewer
+  namespace: katalog-system
+roleRef:
+  kind: ClusterRole
+  name: katalog-viewer
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: Group
+  name: system:serviceaccounts:katalog-system
+  apiGroup: rbac.authorization.k8s.io
+---
+# Grant katalog-system services the katalog-policy-editor Role.
+kind: RoleBinding
+apiVersion: rbac.authorization.k8s.io/v1
+metadata:
+  name: katalog-policy-editor
+  namespace: katalog-system
+roleRef:
+  kind: Role
+  name: katalog-policy-editor
+  apiGroup: rbac.authorization.k8s.io
+subjects:
+- kind: Group
+  name: system:serviceaccounts:katalog-system
+  apiGroup: rbac.authorization.k8s.io
