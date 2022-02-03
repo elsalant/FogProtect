@@ -16,7 +16,7 @@ B59tPpnRPN9CSD97cs_g1KYulYKauNZp1_yFT-Q0HU6RrFXIIGyBZUcNezev5nM2T8FJybHUvRqZQUPg
 lyyuMOW5oCqTQajItDX4dG6TB6lNcU-Ryc8uPRT8yPdiN_yWEt7gjdSSoiACF_-C71ieigaSf9cH0AjOBYVz2QBcRHuNriYc3v1R_JpnxyI14RAMlFetuaCly
 xn89pi65iE4UobjULEkKgcPtNkIg0CpS_FceWFnc00VpCfE5aXPNsndxAum2Zi2DXHuow'\'', '\''AuthToken'\'': '\''s.JvKotVPg3HlQ1ZpchK6xe
 rB'\''}' \
---header 'Authorization: Basic ZmhpcnVzZXI6ZmhpcnVzZXI=' \
+--header 'Authorization: Basic XXX=' \
 --data-raw '{
   "resourceType": "Observation",
   "id": "009",
