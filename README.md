@@ -1,5 +1,5 @@
 Emulation of a use case where a POST command is sent to a REST end point to return data.
-
+ 
 POST commands coming in to the system will include a "role" token which has been authenticated upstream of this code.
 
 Example: curl -H "role: worker" -k  'http://127.0.0.1:80/query/select%20*%20from%20observation'
@@ -45,3 +45,16 @@ curl -H "role: badguy" -k  'http://127.0.0.1:80/query/select%20*%20from%20observ
 4. All information blocked for a give role
 curl -H "role: moose" -k  'http://127.0.0.1:80/query/select%20*%20from%20observation'
 {"action":"Deny","name":"Denied by default"}
+
+
+### Developers  
+To build the Docker image and push to the repo:  
+from the python directory:
+- make docker-build
+- make docker-push
+
+To package and push a chart:  
+from the charts directory:  
+- export HELM_EXPERIMENTAL_OCI=1
+- helm package filteridchart_opa -d /tmp
+- helm push /tmp/filteridchart_opa-0.1.0.tgz oci://ghcr.io/elsalant
