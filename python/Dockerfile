@@ -10,4 +10,5 @@ RUN ["apt-get", "install", "-y", "vim"]
 ENTRYPOINT ["python3"]
 EXPOSE 5559
 ENV PYTHONUNBUFFERED=1
+ENV SCHEMA_ORG="organization"
 CMD ["filter_OPA_JWT.py"]
