@@ -59,7 +59,7 @@ def connectKafka():
         try:
             producer = KafkaProducer(
                 bootstrap_servers=[KAFKA_SERVER],
-                request_timeout_ms=2000
+                max_block_ms = 5000,
             )  # , value_serializer=lambda x:json.dumps(x).encode('utf-8'))
         except Exception as e:
             print("\n--->WARNING: Connection to Kafka failed.  Is the server on " + KAFKA_SERVER + " running?")
