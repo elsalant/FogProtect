@@ -45,7 +45,7 @@ TESTING = False
 kafkaDisabled = False
 kafkaAwaitingFirstConnect = True
 
-KAFKA_SERVER = os.getenv("FOGPROTECT_KAFKA_SERVER") if os.getenv("FOGPROTECT_KAFKA_SERVER") else "172.31.35.158:9092"
+KAFKA_SERVER = os.getenv("FOGPROTECT_KAFKA_SERVER") if os.getenv("FOGPROTECT_KAFKA_SERVER") else "127.0.0.1:9092"
 KAFKA_DENY_TOPIC = os.getenv("KAFKA_DENY_TOPIC") if os.getenv("KAFKA_TOPIC") else "blocked-access"
 KAFKA_ALLOW_TOPIC = os.getenv("KAFKA_ALLOW_TOPIC") if os.getenv("KAFKA_TOPIC") else "granted-access"
 
@@ -157,10 +157,14 @@ def getAll(queryString=None):
         print('filterDict = ' + str(filterDict))
 
     # Go out to the actual destination webserver
-    print("queryGatewayURL= ", queryGatewayURL)
-    ans, returnHeaders = handleQuery(queryGatewayURL, queryString, headersList, request.method, request.form, request.args)
-
-    if (ans is None):
+    print("queryGatewayURL= ", queryGatewayURL, "request.method = " + request.method)
+    try:
+        if request.form:
+            ans, returnHeaders = handleQuery(queryGatewayURL, queryString, headersList, request.method, request.form, request.args)
+        else:
+            ans, returnHeaders = handleQuery(queryGatewayURL, queryString, headersList, request.method, request.data,
+                                             request.args)
+    except:
         return ("No results returned", VALID_RETURN)
 
     filteredLine = ''

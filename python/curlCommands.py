@@ -12,6 +12,7 @@ def handleQuery(queryGatewayURL, queryString, passedHeaders, method, values, arg
     curlString = queryGatewayURL + urllib.parse.unquote_plus(queryStringsLessBlanks)
  #   curlString = queryGatewayURL + str(base64.b64encode(queryStringsLessBlanks.encode('utf-8')))
     if 'Host' in passedHeaders:  # avoid issues with istio gateways
+      passedHeaders= dict(passedHeaders)
       passedHeaders.pop('Host')
     print("curlCommands: curlString = ", curlString)
     try:
