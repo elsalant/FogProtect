@@ -4,9 +4,9 @@ POST commands coming in to the system will include a "role" token which has been
 
 Example: curl -H "role: worker" -k  'http://127.0.0.1:80/query/select%20*%20from%20observation'
 
-1. Build the module executable:
-in python directory:
-> docker build -t filter-opa-jwt:<version> .
+1. Run the module executable:
+in helm directory:
+> helm install filtermodule filtermodule_chart
 
 Restricting data occurs in two ways:
 1. Restricting access to URL endpoints based on role.  For example, a URL that returns video data will be accessed controlled.
@@ -48,10 +48,15 @@ curl -H "role: moose" -k  'http://127.0.0.1:80/query/select%20*%20from%20observa
 
 
 ### Developers  
-To build the Docker image and push to the repo:  
+To build the (Spark-enabled) Docker image and push to the repo:  
 from the python directory:
 - make docker-build
 - make docker-push
+
+To build a non-Spark enabled version:
+In the python directory:
+1. In the Makefile, change the DOCKER_IMG_NAME from filtermodule-spark to filtermodule
+2. In the Dockerfile, change ENV USE_SPARK="true" to "false"
 
 To package and push a chart:  
 from the charts directory:  
