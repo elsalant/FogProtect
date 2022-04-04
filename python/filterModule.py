@@ -29,6 +29,7 @@ ERROR_CODE = 406
 VALID_RETURN = 200
 
 queryGatewayURL = "http://" + REDIRECT_SERVICE + "/"
+FIXED_SCHEMA_USER = 'realm_access.user'
 FIXED_SCHEMA_ROLE = 'realm_access.roles'
 FIXED_SCHEMA_ORG = 'organization'
 
@@ -51,8 +52,8 @@ kafkaDisabled = False
 kafkaAwaitingFirstConnect = True
 
 KAFKA_SERVER = os.getenv("FOGPROTECT_KAFKA_SERVER") if os.getenv("FOGPROTECT_KAFKA_SERVER") else "127.0.0.1:9092"
-KAFKA_DENY_TOPIC = os.getenv("KAFKA_DENY_TOPIC") if os.getenv("KAFKA_TOPIC") else "blocked-access"
-KAFKA_ALLOW_TOPIC = os.getenv("KAFKA_ALLOW_TOPIC") if os.getenv("KAFKA_TOPIC") else "granted-access"
+KAFKA_DENY_TOPIC = os.getenv("KAFKA_DENY_TOPIC") if os.getenv("KAFKA_DENY_TOPIC") else "blocked-access"
+KAFKA_ALLOW_TOPIC = os.getenv("KAFKA_ALLOW_TOPIC") if os.getenv("KAFKA_ALLOW_TOPIC") else "granted-access"
 
 def connectKafka():
     global kafkaAwaitingFirstConnect
@@ -124,12 +125,21 @@ def getAll(queryString=None):
     payloadEncrypted = request.headers.get('Authorization')
     if (payloadEncrypted != None):
         noJWT = False
+        userKey = os.getenv("SCHEMA_USER") if os.getenv("SCHEMA_USER") else FIXED_SCHEMA_USER
         roleKey = os.getenv("SCHEMA_ROLE") if os.getenv("SCHEMA_ROLE") else FIXED_SCHEMA_ROLE
+        try:
+            user = str(decryptJWT(payloadEncrypted, userKey))
+        except:
+            user = 'No user defined'
         role = str(decryptJWT(payloadEncrypted, roleKey))
         organizationKey = os.getenv("SCHEMA_ORG") if os.getenv("SCHEMA_ORG") else FIXED_SCHEMA_ORG
         organization = str(decryptJWT(payloadEncrypted, organizationKey))
     if (noJWT):
         role = request.headers.get('role')   # testing only
+        try:
+            user = request.headers.get('user')
+        except:
+            user = 'No user defined'
     if (role == None):
         role = 'ERROR NO ROLE!'
     logger.info(f"role = {role}")
@@ -140,7 +150,8 @@ def getAll(queryString=None):
 
         for resultDict in blockDict['result']:
             actionOnURL = resultDict['action']
-            jString = "{\"role\": " + role + \
+            jString = "{\"user\": " + user + \
+                      "\"role\": " + role + \
                       ", \"org\": " + organization + \
                       ", \"URL\": \"" + str(request.url) + "\""  + \
                       ", \"Reason\": \"" + str(resultDict['name']) + "\"" + \
