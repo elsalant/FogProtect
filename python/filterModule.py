@@ -34,7 +34,7 @@ FIXED_SCHEMA_ROLE = 'realm_access.roles'
 FIXED_SCHEMA_ORG = 'organization'
 
 logger = logging.getLogger(__name__)
-
+logging.basicConfig(level=logging.INFO)
 logger.info(f"queryGatewayURL: {queryGatewayURL}")
 
 FLASK_PORT_NUM = 5559  # this application
@@ -51,7 +51,7 @@ TESTING = False
 kafkaDisabled = False
 kafkaAwaitingFirstConnect = True
 
-KAFKA_SERVER = os.getenv("FOGPROTECT_KAFKA_SERVER") if os.getenv("FOGPROTECT_KAFKA_SERVER") else "127.0.0.1:9092"
+KAFKA_SERVER = os.getenv("FOGPROTECT_KAFKA_SERVER") if os.getenv("FOGPROTECT_KAFKA_SERVER") else "172.31.35.158:9092"
 KAFKA_DENY_TOPIC = os.getenv("KAFKA_DENY_TOPIC") if os.getenv("KAFKA_DENY_TOPIC") else "blocked-access"
 KAFKA_ALLOW_TOPIC = os.getenv("KAFKA_ALLOW_TOPIC") if os.getenv("KAFKA_ALLOW_TOPIC") else "granted-access"
 
@@ -64,7 +64,7 @@ def connectKafka():
         try:
             producer = KafkaProducer(
                 bootstrap_servers=[KAFKA_SERVER],
-                max_block_ms = 5000,
+                request_timeout_ms=2000
             )  # , value_serializer=lambda x:json.dumps(x).encode('utf-8'))
         except Exception as e:
             logger.warning(f"Connection to Kafka failed.  Is the server on {KAFKA_SERVER} running?")
@@ -133,7 +133,11 @@ def getAll(queryString=None):
             user = 'No user defined'
         role = str(decryptJWT(payloadEncrypted, roleKey))
         organizationKey = os.getenv("SCHEMA_ORG") if os.getenv("SCHEMA_ORG") else FIXED_SCHEMA_ORG
-        organization = str(decryptJWT(payloadEncrypted, organizationKey))
+        try:
+            organization = str(decryptJWT(payloadEncrypted, organizationKey))
+        except:
+            logger.error("No organization in JWT! key = " + organizationKey)
+            organization = "ERROR"
     if (noJWT):
         role = request.headers.get('role')   # testing only
         try:
@@ -141,7 +145,7 @@ def getAll(queryString=None):
         except:
             user = 'No user defined'
     if (role == None):
-        role = 'ERROR NO ROLE!'
+        role = ["ERROR NO ROLE!"]
     logger.info(f"role = {role}")
     if (not TESTING):
     # Determine if the requester has access to this URL.  If the requested endpoint shows up in blockDict, then return 500
@@ -150,12 +154,18 @@ def getAll(queryString=None):
 
         for resultDict in blockDict['result']:
             actionOnURL = resultDict['action']
-            jString = "{\"user\": " + user + \
-                      "\"role\": " + role + \
-                      ", \"org\": " + organization + \
-                      ", \"URL\": \"" + str(request.url) + "\""  + \
-                      ", \"Reason\": \"" + str(resultDict['name']) + "\"" + \
-                      ", \"Timestamp\" : " + "\"" + str(timeOut) + "\"}"
+            try:
+                policy = str(resultDict['name'])
+            except:
+                logger.error(f"resultDict['name'] is null")
+                policy = 'ERROR'
+# role *should* be a string representation of an array, and therefore should not be surrounded by "
+            jString = "{\"user\": \" " + user + "\"," + \
+                      "\"role\": " + role + "," + \
+                      "\"org\": \"" + organization + "\"," + \
+                      "\"URL\": \"" + str(request.url) + "\","  + \
+                      "\"Reason\": \"" + policy + "\"," + \
+                      "\"Timestamp\": \"" + str(timeOut) + "\"}"
             jStringFormatted = jString.replace("'", "\"")
             if actionOnURL == "BlockURL":
                 logToKafka(jStringFormatted, KAFKA_DENY_TOPIC)
@@ -269,7 +279,7 @@ def decryptJWT(encryptedToken, flatKey):
                 decodedKey = decodedJWT
             else:
                 logger.warning(f"{s} not found in decodedKey!")
-                return decodedKey
+                return 'Missing value'
     return decodedKey
 
 def recurse(jDict, keySearch, action):
@@ -295,7 +305,7 @@ if USE_SPARK:
         spark = SparkSession.builder.appName("filter_OPA_spark").config("spark.jars.ivy", "/tmp/.ivy").master("local[*]").getOrCreate()
         sc = spark.sparkContext
         sqlContext = SQLContext(sc)
-        print("sqlSetup - type(ans) = " + str(type(ans)))
+        logging.info(f"sqlSetup - type(ans) = " + str(type(ans)))
         if (type(ans) is list):
             df = spark.read.json(sc.parallelize(ans))
         else:
@@ -330,7 +340,7 @@ def logToKafka(jString, kafka_topic):
         return
     jSONoutBytes = str.encode(jString)
     try:
-        logging.info(f"Writing to Kafka queue {kafka_topic}: {jString}")
+        logging.info(f"Writing to Kafka queue: {kafka_topic}: {jString}")
         producer.send(kafka_topic, value=jSONoutBytes)  # to the SIEM
     except Exception as e:
         logger.warning(f"Write to Kafka failed.  Is the server on {KAFKA_SERVER} running?")
