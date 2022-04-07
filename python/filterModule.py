@@ -29,7 +29,7 @@ ERROR_CODE = 406
 VALID_RETURN = 200
 
 queryGatewayURL = "http://" + REDIRECT_SERVICE + "/"
-FIXED_SCHEMA_USER = 'realm_access.user'
+FIXED_SCHEMA_USER = 'email'
 FIXED_SCHEMA_ROLE = 'realm_access.roles'
 FIXED_SCHEMA_ORG = 'organization'
 
