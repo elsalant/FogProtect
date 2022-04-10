@@ -144,8 +144,8 @@ def getAll(queryString=None):
             user = request.headers.get('user')
         except:
             user = 'No user defined'
-    if (role == None):
-        role = ["ERROR NO ROLE!"]
+    if (role == 'Missing value'):
+        role = "['ERROR NO ROLE!']"
     logger.info(f"role = {role}")
     if (not TESTING):
     # Determine if the requester has access to this URL.  If the requested endpoint shows up in blockDict, then return 500
@@ -160,7 +160,7 @@ def getAll(queryString=None):
                 logger.error(f"resultDict['name'] is null")
                 policy = 'ERROR'
 # role *should* be a string representation of an array, and therefore should not be surrounded by "
-            jString = "{\"user\": \" " + user + "\"," + \
+            jString = "{\"user\": \"" + user + "\"," + \
                       "\"role\": " + role + "," + \
                       "\"org\": \"" + organization + "\"," + \
                       "\"URL\": \"" + str(request.url) + "\","  + \
