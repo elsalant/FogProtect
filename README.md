@@ -20,7 +20,7 @@ To set up:
 2. Apply virtualservice rule-base routing:  (TBD - automatically deployed by blueprint)
    kubectl apply -f vsRedirect.yaml  
 3. Define Asset CRD and then Apply OPA policies (in katalog-system namespace)  (TBD - automatically deployed by blueprint)
-   kubectl apply -f katalog.m4d.ibm.com_assets.yaml
+   kubectl apply -f katalog.m4d.ibm.com_assets.yaml  
    kubectl apply -f policy.yaml -n katalog-system  
 4. Apply OPA assets  (TBD - automatically deployed by blueprint)
    kubectl apply -f asset.yaml
